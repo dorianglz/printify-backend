@@ -21,8 +21,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(json());
-app.use(urlencoded({ extended: true }));
+app.use(json({ limit: '100mb' }));
+app.use(urlencoded({ extended: true, limit: '100mb' }));
 
 // **Répertoire d'uploads et persistance des listings**
 const uploadDir = path.join('uploads');
