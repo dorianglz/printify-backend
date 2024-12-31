@@ -1,119 +1,50 @@
 import express from 'express';
 import cors from 'cors';
 import pkg from 'body-parser';
-import multer from 'multer';
-import fs from 'fs';
-import path from 'path';
 import dotenv from 'dotenv';
+import path from 'path';
 
-// Importer ton routeur existant
-import router from './routes/printify.js';
+// Import des routes
+import printifyRouter from './routes/printify.js';
+import uploadRouter from './routes/upload.js';
 
-// Charger les variables d'environnement
 dotenv.config();
 
 const app = express();
 const { json, urlencoded } = pkg;
 
-// Middleware pour parser les JSON et les URL encodées
+// Middleware
 app.use(cors({
-  origin: '*', // Ou spécifie ton domaine localhost si nécessaire
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(json({ limit: '100mb' }));
 app.use(urlencoded({ extended: true, limit: '100mb' }));
 
-// **Répertoire d'uploads et persistance des listings**
-const uploadDir = path.join('uploads');
-const dataFile = path.join('data.json');
+// Servir les fichiers statiques
+app.use('/uploads', express.static(path.join('uploads')));
 
-// Créer les répertoires nécessaires s'ils n'existent pas
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-if (!fs.existsSync(dataFile)) fs.writeFileSync(dataFile, JSON.stringify([]));
-
-// Chargement des listings existants
-let listings = JSON.parse(fs.readFileSync(dataFile));
-
-// **Multer : Configuration pour les uploads**
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir), // Répertoire des fichiers
-  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)), // Nom unique
-});
-const upload = multer({ storage });
-
-// **Servir les fichiers statiques dans le dossier "uploads"**
-app.use('/uploads', express.static(uploadDir));
-
-// **Debug Middleware pour loguer les requêtes**
+// Logger des requêtes
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
   next();
 });
 
-// **Routes existantes avec ton routeur Printify**
-app.use('/api/printify', router);
+// Routes
+app.use('/api/printify', printifyRouter);
+app.use('/api', uploadRouter);
 
-// **Nouvelle route pour l'upload de fichiers**
-app.post('/api/upload', upload.array('files'), (req, res) => {
-  const files = req.files;
+// Route de santé
+app.get('/health', (req, res) => res.status(200).json({ message: 'Server is healthy!' }));
 
-  files.forEach((file) => {
-    const newListing = {
-      id: Date.now(),
-      title: file.originalname,
-      description: 'Description automatique',
-      tags: ['art', 'poster', 'design'],
-      url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
-    };
-
-    listings.push(newListing);
-  });
-
-  // Sauvegarder les listings dans le fichier JSON
-  fs.writeFileSync(dataFile, JSON.stringify(listings, null, 2));
-  res.json(listings); // Retourner les listings créés
-});
-
-// **Nouvelle route pour récupérer les listings**
-app.get('/api/listings', (req, res) => {
-  res.json(listings);
-});
-
-// **Debug Middleware pour loguer les réponses**
-app.use((req, res, next) => {
-  const send = res.send;
-  res.send = function (body) {
-    console.log(`[${new Date().toISOString()}] Response:`, body);
-    return send.call(this, body);
-  };
-  next();
-});
-
-// **Route de santé pour vérifier le serveur**
-app.get('/health', (req, res) => {
-  console.log('Health check endpoint hit.');
-  res.status(200).json({ message: 'Server is healthy!' });
-});
-
-// **Gestion des erreurs globales**
+// Gestion des erreurs globales
 app.use((err, req, res, next) => {
   console.error('Erreur rencontrée:', err);
   res.status(500).json({ error: err.message });
 });
 
-// **Gestion des erreurs non attrapées**
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-});
-
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-});
-
-// **Démarrage du serveur**
+// Démarrage du serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

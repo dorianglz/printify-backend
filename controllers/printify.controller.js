@@ -1,7 +1,5 @@
-import { createReadStream, unlinkSync } from 'fs';
-import { join } from 'path';
 import axios from 'axios';
-import { PRINTIFY_API_KEY, uploadDir } from '../config/config.js';
+import { PRINTIFY_API_KEY } from '../config/config.js';
 
 const printifyAPI = axios.create({
     baseURL: 'https://api.printify.com/v1',
@@ -67,40 +65,5 @@ export async function deleteProduct(req, res) {
         res.json(response.data);
     } catch (error) {
         res.status(500).json({ error: error.message });
-    }
-}
-
-
-// Upload controller
-export async function uploadToPrintify(req, res) {
-    try {
-    // Check if file exists
-    if (!req.file) {
-        return res.status(400).json({ error: 'File is required' });
-      }
-  
-      // Get the file path
-    //   const filePath = path.resolve(req.file.path);
-  
-    //   // Read the file and convert to Base64
-    //   const fileBuffer = fs.readFileSync(filePath);
-    //   const base64Encoded = fileBuffer.toString('base64');
-  
-
-      // Example: Send the Base64 data using axios
-      const response = await printifyAPI.post('/uploads/image.json', {
-        "contens": req.body.content, // Send the Base64 data
-        "file_name": req.body.name, // Include original file name if needed
-        // fileType: req.file.mimetype, // Include MIME type if needed
-      });
-  
-      // Delete the temporary uploaded file
-      fs.unlinkSync(filePath);
-  
-      // Return the response from the external API
-      res.status(200).json(response.data);
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Something went wrong' });
     }
 }

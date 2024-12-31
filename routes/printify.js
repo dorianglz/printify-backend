@@ -1,6 +1,11 @@
 import { Router } from 'express';
-import { getShops, getCatalog, createProduct, getProducts, deleteProduct, uploadToPrintify } from '../controllers/printify.controller.js';
-import upload from '../middlewares/upload.js';
+import {
+    getShops,
+    getCatalog,
+    createProduct,
+    getProducts,
+    deleteProduct
+} from '../controllers/printify.controller.js';
 
 const router = Router();
 
@@ -10,8 +15,5 @@ router.get('/catalog', getCatalog);
 router.post('/products', createProduct);
 router.get('/products', getProducts);
 router.delete('/products/:id', deleteProduct);
-
-//router.post('/upload', upload.single('file'), uploadToPrintify);
-router.post('/upload', uploadToPrintify);
 
 export default router;
