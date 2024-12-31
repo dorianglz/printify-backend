@@ -16,7 +16,11 @@ const app = express();
 const { json, urlencoded } = pkg;
 
 // Middleware pour parser les JSON et les URL encodées
-app.use(cors());
+app.use(cors({
+  origin: '*', // Ou spécifie ton domaine localhost si nécessaire
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
