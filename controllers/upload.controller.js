@@ -4,7 +4,7 @@ import multer from 'multer';
 
 // Répertoires et fichiers
 const uploadDir = path.join('uploads');
-const dataFile = path.join('data', 'data.json');
+const dataFile = path.join('data.json');
 
 // Création des répertoires si besoin
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
