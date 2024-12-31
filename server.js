@@ -6,6 +6,9 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 
+// Importer ton routeur existant
+import router from './routes/printify.js';
+
 // Charger les variables d'environnement
 dotenv.config();
 
@@ -17,37 +20,28 @@ app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-// Fichier JSON pour stocker les listings temporaires
-const dataFile = path.join(__dirname, 'data.json');
+// **Répertoire d'uploads et persistance des listings**
+const uploadDir = path.join('uploads');
+const dataFile = path.join('data.json');
 
-// Créer un dossier pour stocker les uploads s'il n'existe pas
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
+// Créer les répertoires nécessaires s'ils n'existent pas
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+if (!fs.existsSync(dataFile)) fs.writeFileSync(dataFile, JSON.stringify([]));
 
-// Gestion des fichiers avec Multer
+// Chargement des listings existants
+let listings = JSON.parse(fs.readFileSync(dataFile));
+
+// **Multer : Configuration pour les uploads**
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir); // Répertoire de stockage
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Nom unique basé sur le timestamp
-  },
+  destination: (req, file, cb) => cb(null, uploadDir), // Répertoire des fichiers
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)), // Nom unique
 });
-
 const upload = multer({ storage });
 
-// Initialiser les données à partir du fichier JSON
-let listings = [];
-if (fs.existsSync(dataFile)) {
-  listings = JSON.parse(fs.readFileSync(dataFile));
-}
-
-// Servir les fichiers statiques dans le dossier "uploads"
+// **Servir les fichiers statiques dans le dossier "uploads"**
 app.use('/uploads', express.static(uploadDir));
 
-// Debug Middleware pour loguer les requêtes
+// **Debug Middleware pour loguer les requêtes**
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   console.log('Headers:', req.headers);
@@ -55,7 +49,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// **Route pour l'upload de fichiers**
+// **Routes existantes avec ton routeur Printify**
+app.use('/api/printify', router);
+
+// **Nouvelle route pour l'upload de fichiers**
 app.post('/api/upload', upload.array('files'), (req, res) => {
   const files = req.files;
 
@@ -65,7 +62,7 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
       title: file.originalname,
       description: 'Description automatique',
       tags: ['art', 'poster', 'design'],
-      url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`, // URL accessible publiquement
+      url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
     };
 
     listings.push(newListing);
@@ -76,12 +73,12 @@ app.post('/api/upload', upload.array('files'), (req, res) => {
   res.json(listings); // Retourner les listings créés
 });
 
-// **Route pour récupérer les listings**
+// **Nouvelle route pour récupérer les listings**
 app.get('/api/listings', (req, res) => {
   res.json(listings);
 });
 
-// Debug Middleware pour loguer les réponses
+// **Debug Middleware pour loguer les réponses**
 app.use((req, res, next) => {
   const send = res.send;
   res.send = function (body) {
@@ -91,7 +88,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// **Route de santé pour vérifier que le serveur tourne**
+// **Route de santé pour vérifier le serveur**
 app.get('/health', (req, res) => {
   console.log('Health check endpoint hit.');
   res.status(200).json({ message: 'Server is healthy!' });
