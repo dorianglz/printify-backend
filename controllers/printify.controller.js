@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PRINTIFY_API_KEY } from '../config/config.js';
+import { PRINTIFY_API_KEY, PRINTIFY_SHOP_ID } from '../config/config.js';
 
 const printifyAPI = axios.create({
     baseURL: 'https://api.printify.com/v1',
