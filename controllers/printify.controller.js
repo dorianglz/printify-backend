@@ -68,22 +68,31 @@ export async function deleteProduct(req, res) {
     }
 }
 
-export async function duplicateProduct(res) {
+export async function duplicateProduct(req, res) {
     try {
-        const { productId } = req.params; // ID du produit à modifier
+        const { productId } = req.params; // ID du produit à dupliquer
         const shopId = PRINTIFY_SHOP_ID;
+
+        console.log(`Duplication du produit ${productId} en cours...`);
 
         // Appel à l'API Printify pour dupliquer le produit
         const response = await printifyAPI.post(
             `/shops/${shopId}/products/${productId}/duplicates.json`
         );
-        res.json(response.data);
+
+        console.log('Produit dupliqué avec succès :', response.data);
+        return res.status(200).json(response.data); // Réponse avec succès
+
     } catch (error) {
-        console.error('Erreur lors de la duplication du produit :', error.response?.data || error.message);
-        res.status(500).json({ error: error.message });
+        console.error('Erreur lors de la duplication :', error.response?.data || error.message);
+
+        // Gestion spécifique des erreurs pour éviter un crash
+        const statusCode = error.response?.status || 500;
+        const errorMessage = error.response?.data || error.message;
+
+        return res.status(statusCode).json({ error: errorMessage });
     }
 }
-
 export async function updateProduct(req, res) {
     try {
         const { productId } = req.params; // ID du produit à modifier
