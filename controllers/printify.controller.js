@@ -67,3 +67,45 @@ export async function deleteProduct(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
+
+export async function duplicateProduct(res) {
+    try {
+        const productId = "672f7c5f7bd68d79ef05dcfe";
+        const shopId = PRINTIFY_SHOP_ID;
+
+        // Appel à l'API Printify pour dupliquer le produit
+        const response = await printifyAPI.post(
+            `/shops/${shopId}/products/${productId}/duplicates.json`
+        );
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erreur lors de la duplication du produit :', error.response?.data || error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+export async function updateProduct(req, res) {
+    try {
+        const { productId } = req.params; // ID du produit à modifier
+        const shopId = PRINTIFY_SHOP_ID;
+        const { title, description, tags, image } = req.body; // Données modifiées
+
+        const updatedData = {
+            title,
+            description,
+            tags,
+            images: [{ src: image }], // URL de la nouvelle image
+        };
+
+        // Mise à jour via l'API Printify
+        const response = await printifyAPI.put(
+            `/shops/${shopId}/products/${productId}.json`,
+            updatedData
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du produit :', error.response?.data || error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
