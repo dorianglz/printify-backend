@@ -70,7 +70,7 @@ export async function deleteProduct(req, res) {
 
 export async function duplicateProduct(res) {
     try {
-        const productId = "672f7c5f7bd68d79ef05dcfe";
+        const { productId } = req.params; // ID du produit à modifier
         const shopId = PRINTIFY_SHOP_ID;
 
         // Appel à l'API Printify pour dupliquer le produit
