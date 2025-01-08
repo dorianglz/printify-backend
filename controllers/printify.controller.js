@@ -33,21 +33,17 @@ export async function getCatalog(req, res) {
 // Create a product
 export async function createProduct(req, res) {
     try {
-        console.log('Product data received:', req.body); // Log des données reçues
+        //console.log('Product data received:', req.body); // Log des données reçues
 
         const data = req.body;
         const shopId = PRINTIFY_SHOP_ID;
 
         // Envoi de la requête POST avec Content-Type configuré
-        console.log("data : ", data)
         const response = await printifyAPI.post(
             `/shops/${shopId}/products.json`,
             data,
             {
-                headers: { 
-                    "Content-Type": "text/plain",
-                    "Content-Type": "application/json"
-                } // Correction ici
+                headers: { "Content-Type": "application/json" } // Correction ici
             }
         );
 
