@@ -36,7 +36,7 @@ export async function createProduct(req, res) {
         console.log('Product data received:', req.body); // Log des données reçues
         const { data } = req.body;
         const shopId = PRINTIFY_SHOP_ID;
-        const response = await printifyAPI.post(`/shops/${shopId}/products.json`, data);
+        const response = await printifyAPI.post(`/shops/${shopId}/products.json`, data, {"Content-Type": "application/json"});
         console.log('Printify API response:', response.data); // Log de la réponse si succès
         res.json(response.data);
     } catch (error) {
