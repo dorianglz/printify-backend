@@ -35,7 +35,7 @@ export async function createProduct(req, res) {
     try {
         console.log('Product data received:', req.body); // Log des données reçues
 
-        const { data } = req.body;
+        const data = req.body;
         const shopId = PRINTIFY_SHOP_ID;
 
         // Envoi de la requête POST avec Content-Type configuré
