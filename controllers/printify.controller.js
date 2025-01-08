@@ -34,14 +34,28 @@ export async function getCatalog(req, res) {
 export async function createProduct(req, res) {
     try {
         console.log('Product data received:', req.body); // Log des données reçues
+
         const { data } = req.body;
         const shopId = PRINTIFY_SHOP_ID;
-        const response = await printifyAPI.post(`/shops/${shopId}/products.json`, data, {"Content-Type": "application/json"});
+
+        // Envoi de la requête POST avec Content-Type configuré
+        console.log(shopId)
+        const response = await printifyAPI.post(
+            `/shops/${shopId}/products.json`,
+            data,
+            {
+                headers: { "Content-Type": "application/json" } // Correction ici
+            }
+        );
+
         console.log('Printify API response:', response.data); // Log de la réponse si succès
-        res.json(response.data);
+        res.json(response.data); // Répond au client avec les données reçues
     } catch (error) {
         console.error('Printify API error:', error.response?.data || error.message); // Log de l'erreur si échec
-        res.status(500).json({ error: error.message });
+
+        // Retourne un message d'erreur avec le code de statut
+        const statusCode = error.response?.status || 500;
+        res.status(statusCode).json({ error: error.response?.data || error.message });
     }
 }
 
