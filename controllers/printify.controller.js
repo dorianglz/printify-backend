@@ -33,11 +33,11 @@ export async function getCatalog(req, res) {
 // Create a product
 export async function createProduct(req, res) {
     try {
-        //console.log('Product data received:', req.body); // Log des données reçues
+        console.log('Product data received:', req.body); // Log des données reçues
         const { data } = req.body;
         const shopId = PRINTIFY_SHOP_ID;
         const response = await printifyAPI.post(`/shops/${shopId}/products.json`, data);
-        //console.log('Printify API response:', response.data); // Log de la réponse si succès
+        console.log('Printify API response:', response.data); // Log de la réponse si succès
         res.json(response.data);
     } catch (error) {
         console.error('Printify API error:', error.response?.data || error.message); // Log de l'erreur si échec
