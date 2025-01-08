@@ -39,12 +39,15 @@ export async function createProduct(req, res) {
         const shopId = PRINTIFY_SHOP_ID;
 
         // Envoi de la requête POST avec Content-Type configuré
-        console.log(shopId)
+        console.log("data : ", data)
         const response = await printifyAPI.post(
             `/shops/${shopId}/products.json`,
             data,
             {
-                headers: { "Content-Type": "application/json" } // Correction ici
+                headers: { 
+                    "Content-Type": "text/plain",
+                    "Content-Type": "application/json"
+                } // Correction ici
             }
         );
 
